@@ -27,7 +27,7 @@ on:
         type: string
 
 runs:
-  using: "composite"
+  # using: "composite"
   env:
     product: ${{ inputs.product }}
     temppath: ${{ inputs.temppath }}
