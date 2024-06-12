@@ -51,7 +51,7 @@ runs:
         if [[ "${{ github.event.inputs.product }}" -eq "__AUTO__" ]]
         then
           # Automatically get package name
-          PRODUCT_NAME=`cat Package.swift | grep "name" | awk -F'"' '{print $2}'`
+          PRODUCT_NAME=`cat Package.swift | grep -m1 "name" | awk -F'"' '{print $2}'`
         else
           # Use provided product name
           PRODUCT_NAME="${{ github.event.inputs.product }}"
@@ -73,7 +73,7 @@ runs:
         if [[ "${{ github.event.inputs.product }}" -eq "__AUTO__" ]]
         then
           # Automatically get package name
-          PRODUCT_NAME=`cat Package.swift | grep "name" | awk -F'"' '{print $2}'`
+          PRODUCT_NAME=`cat Package.swift | grep -m1 "name" | awk -F'"' '{print $2}'`
         else
           # Use provided product name
           PRODUCT_NAME="${{ github.event.inputs.product }}"
