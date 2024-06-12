@@ -28,69 +28,67 @@ on:
 
 runs:
   using: "composite"
-  build-docc:
-    env:
-      product: ${{ inputs.product }}
-      temppath: ${{ inputs.temppath }}
-      branch: ${{ inputs.branch }}
-      iOS: ${{ inputs.iOS }}
+  env:
+    product: ${{ inputs.product }}
+    temppath: ${{ inputs.temppath }}
+    branch: ${{ inputs.branch }}
+    iOS: ${{ inputs.iOS }}
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Create folder for generated documentation
+      run: |
+        mkdir $temppath
 
-      - name: Create folder for generated documentation
-        run: |
-          mkdir $temppath
+    - name: Add docc plugin to Package.swift
+      run: |
+        echo "package.dependencies.append(" >> package.swift
+        echo "  .package(url: \"https://github.com/apple/swift-docc-plugin\", from: \"1.0.0\")" >> package.swift
+        echo ")" >> Package.swift
 
-      - name: Add docc plugin to Package.swift
-        run: |
-          echo "package.dependencies.append(" >> package.swift
-          echo "  .package(url: \"https://github.com/apple/swift-docc-plugin\", from: \"1.0.0\")" >> package.swift
-          echo ")" >> Package.swift
+    - name: Build Documentation (SPM)
+      if: $iOS == false
+      run: |
+        swift package --allow-writing-to-directory $temppath \
+        generate-documentation \
+        --target $product\
+        --disable-indexing \
+        --output-path $temppath \
+        --transform-for-static-hosting \
+        --hosting-base-path `basename ${{ github.repository }}`
 
-      - name: Build Documentation (SPM)
-        if: $iOS == false
-        run: |
-          swift package --allow-writing-to-directory $temppath \
-          generate-documentation \
-          --target $product\
-          --disable-indexing \
-          --output-path $temppath \
-          --transform-for-static-hosting \
-          --hosting-base-path `basename ${{ github.repository }}`
+    - name: Build Documentation (iOS)
+      if: $iOS == true
+      run: |
+        xcodebuild docbuild -scheme $product \
+        -destination generic/platform=iOS \
+        OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path $temppath"
 
-      - name: Build Documentation (iOS)
-        if: $iOS == true
-        run: |
-          xcodebuild docbuild -scheme $product \
-          -destination generic/platform=iOS \
-          OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path $temppath"
+    - name: Init new repo in and add required files
+      run: |
+        cd $temppath
+        git init -b $branch
+        DOCURL=`basename ${{ github.repository }}`
+        echo "{\"meta\":{\"title\":\"$DOCURL Documentation\"}}" > theme-settings.json
 
-      - name: Init new repo in and add required files
-        run: |
-          cd $temppath
-          git init -b $branch
-          DOCURL=`basename ${{ github.repository }}`
-          echo "{\"meta\":{\"title\":\"$DOCURL Documentation\"}}" > theme-settings.json
+        DOCURL=${DOCURL//-/_}
+        echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > index.html
+        echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > 404.html
 
-          DOCURL=${DOCURL//-/_}
-          echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > index.html
-          echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > 404.html
+    - name: Commit generated files
+      run: |
+        git add -A .
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git commit -m 'deploy'
 
-      - name: Commit generated files
-        run: |
-          git add -A .
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git commit -m 'deploy'
-
-      - name: Push to repo
-        run: |
-          git push \
-          "https://${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
-          HEAD:$branch \
-          --force
+    - name: Push to repo
+      run: |
+        git push \
+        "https://${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
+        HEAD:$branch \
+        --force
 
 branding:
   icon: "upload-cloud"
