@@ -20,7 +20,7 @@ inputs:
   iOS:
     description: 'Build for iOS?'
     required: false
-    default: false
+    default: 'false'
   temppath:
     description: 'Temporarly file path'
     required: false
