@@ -88,7 +88,7 @@ runs:
       shell: bash
       run: |
         git push \
-        "https://${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
+        "https://${{ github.repository_owner }}:${{ github.token }}@github.com/${{ github.repository }}.git" \
         HEAD:${{ inputs.branch }} \
         --force
 
