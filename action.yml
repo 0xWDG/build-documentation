@@ -35,8 +35,7 @@ runs:
     - name: Create folder for generated documentation
       shell: bash
       run: |
-        echo "inputs.temppath=${{ inputs.temppath }}, temppath=$temppath"
-        mkdir $temppath
+        mkdir ${{ github.event.inputs.temppath }}
 
     - name: Add docc plugin to Package.swift
       shell: bash
@@ -47,29 +46,29 @@ runs:
 
     - name: Build Documentation (SPM)
       shell: bash
-      if: ${{ inputs.iOS == false }}
+      if: ${{ github.event.inputs.iOS == false }}
       run: |
-        swift package --allow-writing-to-directory $temppath \
+        swift package --allow-writing-to-directory ${{ github.event.inputs.temppath }} \
         generate-documentation \
-        --target $product \
+        --target ${{ github.event.inputs.product }} \
         --disable-indexing \
-        --output-path $temppath \
+        --output-path ${{ github.event.inputs.temppath }} \
         --transform-for-static-hosting \
         --hosting-base-path `basename ${{ github.repository }}`
 
     - name: Build Documentation (iOS)
       shell: bash
-      if: ${{ inputs.iOS == true }}
+      if: ${{ github.event.inputs.iOS == true }}
       run: |
-        xcodebuild docbuild -scheme $product \
+        xcodebuild docbuild -scheme ${{ github.event.inputs.product }} \
         -destination generic/platform=iOS \
-        OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path $temppath"
+        OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path ${{ github.event.inputs.temppath }}"
 
     - name: Init new repo in and add required files
       shell: bash
       run: |
-        cd $temppath
-        git init -b $branch
+        cd ${{ github.event.inputs.temppath }}
+        git init -b ${{ github.event.inputs.branch }}
         DOCURL=`basename ${{ github.repository }}`
         echo "{\"meta\":{\"title\":\"$DOCURL Documentation\"}}" > theme-settings.json
 
@@ -90,13 +89,8 @@ runs:
       run: |
         git push \
         "https://${{ github.repository_owner }}:${{ github.token }}@github.com/${{ github.repository }}.git" \
-        HEAD:$branch \
+        HEAD:${{ github.event.inputs.branch }} \
         --force
-  env:
-    product: ${{ inputs.product }}
-    temppath: ${{ inputs.temppath }}
-    branch: ${{ inputs.branch }}
-    iOS: ${{ inputs.iOS }}
 
 branding:
   icon: "upload-cloud"
