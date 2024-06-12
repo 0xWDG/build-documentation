@@ -5,7 +5,7 @@ inputs:
     default: 'World'
 
 name: 'Build documentation'
-description: 'Build documentation using Swift\'s docc'
+description: 'Build documentation using Swifts docc'
 
 inputs:
   branch:
@@ -32,6 +32,7 @@ jobs:
       temppath: ${{ inputs.temppath }}
       branch: ${{ inputs.branch }}
       iOS: ${{ inputs.iOS }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
