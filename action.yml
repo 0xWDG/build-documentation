@@ -46,7 +46,7 @@ runs:
        
     - name: Build Documentation (SPM)
       shell: bash
-      if: ${{ inputs.iOS == false }}
+      if: !inputs.iOS
       run: |
         if [[ "${{ inputs.product }}" == "__AUTO__" ]]
         then
@@ -68,7 +68,7 @@ runs:
 
     - name: Build Documentation (iOS)
       shell: bash
-      if: ${{ inputs.iOS == true }}
+      if: inputs.iOS
       run: |
         if [[ "${{ inputs.product }}" == "__AUTO__" ]]
         then
