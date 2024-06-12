@@ -6,23 +6,19 @@ inputs:
   branch:
     description: 'Branch to push to'
     required: false
-     default: 'documentation'
-    type: string
+    default: 'documentation'
   product:
     description: 'product name'
     required: false
     default: '__AUTO__'
-    type: string
   iOS:
     description: 'Build for iOS?'
     required: true
     default: false
-    type: boolean
   temppath:
     description: 'product name'
     required: false
     default: 'tmpdocs'
-    type: string
 
 runs:
   using: "composite"
