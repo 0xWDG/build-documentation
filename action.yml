@@ -26,7 +26,7 @@ on:
         default: 'tmpdocs'
         type: string
 
-jobs:
+runs:
   using: "composite"
   build-docc:
     env:
