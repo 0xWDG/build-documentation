@@ -28,7 +28,6 @@ inputs:
 
 jobs:
   build-docc:
-    runs-on: macos-latest
     env:
       product: ${{ inputs.product }}
       temppath: ${{ inputs.temppath }}
