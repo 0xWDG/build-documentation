@@ -1,5 +1,6 @@
 name: 'Build documentation'
 description: 'Build documentation using Swifts docc'
+author: 'Wesley de Groot'
 
 on:
   workflow_call:
@@ -91,3 +92,7 @@ jobs:
           "https://${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
           HEAD:$branch \
           --force
+
+branding:
+  icon: "upload-cloud"
+  color: "blue"
