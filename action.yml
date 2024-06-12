@@ -19,7 +19,7 @@ inputs:
     default: '__AUTO__'
   iOS:
     description: 'Build for iOS?'
-    required: true
+    required: false
     default: false
   temppath:
     description: 'Temporarly file path'
