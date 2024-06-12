@@ -27,9 +27,8 @@ on:
         type: string
 
 jobs:
+  using: "composite"
   build-docc:
-    using: "composite"
-
     env:
       product: ${{ inputs.product }}
       temppath: ${{ inputs.temppath }}
