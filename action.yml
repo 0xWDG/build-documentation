@@ -4,10 +4,9 @@ inputs:
     required: true
     default: 'World'
 
-name: build-documentation
+name: 'Build documentation'
+description: 'Build documentation using Swift\'s docc'
 
-name: 'Build docc documentation'
-description: 'Greet someone'
 inputs:
   branch:
     description: 'Branch to push to'
