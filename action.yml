@@ -1,6 +1,6 @@
 name: 'Build documentation'
 description: 'Build documentation using Swifts docc'
-author: 'Wesley de Groot'
+author: 'Wesley de Groot <email+gha@wesleydegroot.nl>'
 
 on:
   workflow_call:
@@ -27,19 +27,14 @@ on:
         type: string
 
 runs:
-  # using: "composite"
-  env:
-    product: ${{ inputs.product }}
-    temppath: ${{ inputs.temppath }}
-    branch: ${{ inputs.branch }}
-    iOS: ${{ inputs.iOS }}
+  using: "composite"
   steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
     - name: Create folder for generated documentation
       run: |
-        mkdir $temppath
+        mkdir ${{ inputs.temppath }}
 
     - name: Add docc plugin to Package.swift
       run: |
@@ -48,27 +43,27 @@ runs:
         echo ")" >> Package.swift
 
     - name: Build Documentation (SPM)
-      if: $iOS == false
+      if: ${{ inputs.iOS == false }}
       run: |
-        swift package --allow-writing-to-directory $temppath \
+        swift package --allow-writing-to-directory ${{ inputs.temppath }} \
         generate-documentation \
-        --target $product\
+        --target ${{ inputs.product }} \
         --disable-indexing \
-        --output-path $temppath \
+        --output-path ${{ inputs.temppath }} \
         --transform-for-static-hosting \
         --hosting-base-path `basename ${{ github.repository }}`
 
     - name: Build Documentation (iOS)
-      if: $iOS == true
+      if: ${{ inputs.iOS == true }}
       run: |
-        xcodebuild docbuild -scheme $product \
+        xcodebuild docbuild -scheme ${{ inputs.product }} \
         -destination generic/platform=iOS \
         OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path $temppath"
 
     - name: Init new repo in and add required files
       run: |
-        cd $temppath
-        git init -b $branch
+        cd ${{ inputs.temppath }}
+        git init -b ${{ inputs.branch }}
         DOCURL=`basename ${{ github.repository }}`
         echo "{\"meta\":{\"title\":\"$DOCURL Documentation\"}}" > theme-settings.json
 
@@ -87,7 +82,7 @@ runs:
       run: |
         git push \
         "https://${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
-        HEAD:$branch \
+        HEAD:${{ inputs.branch }} \
         --force
 
 branding:
