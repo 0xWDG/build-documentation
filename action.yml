@@ -1,3 +1,9 @@
+# Build documentation GitHub Action
+# This action uses docc to build the documentation
+#
+# Made by: Wesley de Groot 
+# Email: email+gha@wesleydegroot.nl
+
 name: 'Build documentation'
 description: 'Build documentation using Swifts docc'
 author: 'Wesley de Groot <email+gha@wesleydegroot.nl>'
@@ -16,7 +22,7 @@ inputs:
     required: true
     default: false
   temppath:
-    description: 'product name'
+    description: 'Temporarly file path'
     required: false
     default: 'tmpdocs'
 
@@ -37,14 +43,17 @@ runs:
         echo "package.dependencies.append(" >> package.swift
         echo "  .package(url: \"https://github.com/apple/swift-docc-plugin\", from: \"1.0.0\")" >> package.swift
         echo ")" >> Package.swift
-
+       
     - name: Build Documentation (SPM)
       shell: bash
       if: ${{ github.event.inputs.iOS == false }}
       run: |
+        PRODUCT_NAME="${{ github.event.inputs.product == 'AUTO' ? 'GET PRODUCT NAME' : github.event.inputs.product }}"
+        echo "$PRODUCT_NAME"
+        
         swift package --allow-writing-to-directory ${{ inputs.temppath }} \
         generate-documentation \
-        --target ${{ inputs.product }} \
+        --target $PRODUCT_NAME \
         --disable-indexing \
         --output-path ${{ inputs.temppath }} \
         --transform-for-static-hosting \
