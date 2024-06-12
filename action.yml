@@ -20,7 +20,7 @@ inputs:
   iOS:
     description: 'Build for iOS?'
     required: false
-    default: 'false'
+    default: false
   temppath:
     description: 'Temporarly file path'
     required: false
@@ -46,7 +46,7 @@ runs:
        
     - name: Build Documentation (SPM)
       shell: bash
-      if: "${{ github.event.inputs.iOS == false }}"
+      if: ${{ inputs.iOS == false || inputs.iOS == 'false' }}
       run: |
         if [[ "${{ inputs.product }}" == "__AUTO__" ]]
         then
@@ -68,7 +68,7 @@ runs:
 
     - name: Build Documentation (iOS)
       shell: bash
-      if: "${{ github.event.inputs.iOS == true }}"
+      if: ${{ inputs.iOS == true || inputs.iOS == true }}
       run: |
         if [[ "${{ inputs.product }}" == "__AUTO__" ]]
         then
