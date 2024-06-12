@@ -60,7 +60,7 @@ runs:
         
         swift package --allow-writing-to-directory ${{ inputs.temppath }} \
         generate-documentation \
-        --target $PRODUCT_NAME \
+        --target "$PRODUCT_NAME" \
         --disable-indexing \
         --output-path ${{ inputs.temppath }} \
         --transform-for-static-hosting \
@@ -79,7 +79,7 @@ runs:
           PRODUCT_NAME="${{ inputs.product }}"
         fi
 
-        xcodebuild docbuild -scheme $PRODUCT_NAME \
+        xcodebuild docbuild -scheme "$PRODUCT_NAME" \
         -destination generic/platform=iOS \
         OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path ${{ inputs.temppath }}"
 
