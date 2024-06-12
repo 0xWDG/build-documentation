@@ -48,7 +48,14 @@ runs:
       shell: bash
       if: ${{ github.event.inputs.iOS == false }}
       run: |
-        PRODUCT_NAME="${{ github.event.inputs.product == 'AUTO' ? 'GET PRODUCT NAME' : github.event.inputs.product }}"
+        if [[ "${{ github.event.inputs.product }}" -eq "__AUTO__" ]]
+        then
+          # Automatically get package name
+          PRODUCT_NAME=`cat Package.swift | grep "name" | awk -F'"' '{print $2}'`
+        else
+          # Use provided product name
+          PRODUCT_NAME="${{ github.event.inputs.product }}"
+        fi
         echo "$PRODUCT_NAME"
         
         swift package --allow-writing-to-directory ${{ inputs.temppath }} \
@@ -63,7 +70,16 @@ runs:
       shell: bash
       if: ${{ github.event.inputs.iOS == true }}
       run: |
-        xcodebuild docbuild -scheme ${{ inputs.product }} \
+        if [[ "${{ github.event.inputs.product }}" -eq "__AUTO__" ]]
+        then
+          # Automatically get package name
+          PRODUCT_NAME=`cat Package.swift | grep "name" | awk -F'"' '{print $2}'`
+        else
+          # Use provided product name
+          PRODUCT_NAME="${{ github.event.inputs.product }}"
+        fi
+
+        xcodebuild docbuild -scheme $PRODUCT_NAME \
         -destination generic/platform=iOS \
         OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path ${{ inputs.temppath }}"
 
