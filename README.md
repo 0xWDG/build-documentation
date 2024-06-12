@@ -20,6 +20,7 @@ jobs:
 
 
 ```yaml
+# .github/workflows/build-documentation.yml
 name: build-documentation
 
 on:
@@ -37,9 +38,4 @@ jobs:
     steps:
       - name: Build documentation
         uses: 0xWDG/build-documentation@main
-        with:
-          product: Product-Name
-          temppath: tmpdocs
-          branch: documentation
-          iOS: false # Build for iOS
 ```
