@@ -1,23 +1,25 @@
 name: 'Build documentation'
 description: 'Build documentation using Swifts docc'
 
-inputs:
-  branch:
-    description: 'Branch to push to'
-    required: false
-    default: 'documentation'
-  product:
-    description: 'product name'
-    required: false
-    default: '__AUTO__'
-  iOS:
-    description: 'Build for iOS?'
-    required: true
-    default: false
-  temppath:
-    description: 'product name'
-    required: false
-    default: 'tmpdocs'
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to push to'
+        required: false
+        default: 'documentation'
+      product:
+        description: 'product name'
+        required: false
+        default: '__AUTO__'
+      iOS:
+        description: 'Build for iOS?'
+        required: true
+        default: false
+      temppath:
+        description: 'product name'
+        required: false
+        default: 'tmpdocs'
 
 jobs:
   build-docc:
