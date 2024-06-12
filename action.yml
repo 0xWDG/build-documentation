@@ -33,16 +33,19 @@ runs:
       uses: actions/checkout@v2
 
     - name: Create folder for generated documentation
+      shell: bash
       run: |
         mkdir ${{ inputs.temppath }}
 
     - name: Add docc plugin to Package.swift
+      shell: bash
       run: |
         echo "package.dependencies.append(" >> package.swift
         echo "  .package(url: \"https://github.com/apple/swift-docc-plugin\", from: \"1.0.0\")" >> package.swift
         echo ")" >> Package.swift
 
     - name: Build Documentation (SPM)
+      shell: bash
       if: ${{ inputs.iOS == false }}
       run: |
         swift package --allow-writing-to-directory ${{ inputs.temppath }} \
@@ -54,6 +57,7 @@ runs:
         --hosting-base-path `basename ${{ github.repository }}`
 
     - name: Build Documentation (iOS)
+      shell: bash
       if: ${{ inputs.iOS == true }}
       run: |
         xcodebuild docbuild -scheme ${{ inputs.product }} \
@@ -61,6 +65,7 @@ runs:
         OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path $temppath"
 
     - name: Init new repo in and add required files
+      shell: bash
       run: |
         cd ${{ inputs.temppath }}
         git init -b ${{ inputs.branch }}
@@ -72,6 +77,7 @@ runs:
         echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > 404.html
 
     - name: Commit generated files
+      shell: bash
       run: |
         git add -A .
         git config user.name github-actions
@@ -79,6 +85,7 @@ runs:
         git commit -m 'deploy'
 
     - name: Push to repo
+      shell: bash
       run: |
         git push \
         "https://${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
