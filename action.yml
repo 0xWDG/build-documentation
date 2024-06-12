@@ -34,6 +34,8 @@ runs:
 
     - name: Create folder for generated documentation
       shell: bash
+      env:
+        temppath: ${{ inputs.temppath }}
       run: |
         echo "${{ inputs.temppath }}, ${{ github.event.inputs.temppath }}, $temppath"
         mkdir ${{ github.event.inputs.temppath }}
