@@ -68,7 +68,7 @@ runs:
 
     - name: Build Documentation (iOS)
       shell: bash
-      if: ${{ inputs.iOS == true || inputs.iOS == true }}
+      if: ${{ inputs.iOS == true || inputs.iOS == 'true' }}
       run: |
         if [[ "${{ inputs.product }}" == "__AUTO__" ]]
         then
