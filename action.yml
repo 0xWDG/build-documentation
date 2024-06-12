@@ -11,7 +11,7 @@ description: 'Greet someone'
 inputs:
   branch:
     description: 'Branch to push to'
-    required: true
+    required: false
     default: 'documentation'
   product:
     description: 'product name'
