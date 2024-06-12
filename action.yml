@@ -28,10 +28,10 @@ on:
 jobs:
   build-docc:
     env:
-      product: ${{ inputs.product }}
-      temppath: ${{ inputs.temppath }}
-      branch: ${{ inputs.branch }}
-      iOS: ${{ inputs.iOS }}
+      product: ${{ github.event.inputs.product }}
+      temppath: ${{ github.event.inputs.temppath }}
+      branch: ${{ github.event.inputs.branch }}
+      iOS: ${{ github.event.inputs.iOS }}
 
     steps:
       - name: Checkout repository
