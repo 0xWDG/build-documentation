@@ -88,6 +88,14 @@ runs:
       run: |
         cd ${{ inputs.temppath }}
         git init -b ${{ inputs.branch }}
+        if [[ "${{ github.event.inputs.product }}" -eq "__AUTO__" ]]
+        then
+          # Automatically get package name
+          PRODUCT_NAME=`cat Package.swift | grep -m1 "name" | awk -F'"' '{print $2}'`
+        else
+          # Use provided product name
+          PRODUCT_NAME="${{ github.event.inputs.product }}"
+        fi
         echo "{\"meta\":{\"title\":\"$PRODUCT_NAME Documentation\"}}" > theme-settings.json
         DOCURL=${PRODUCT_NAME//-/_}
         echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > index.html
