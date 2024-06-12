@@ -92,11 +92,11 @@ runs:
         "https://${{ github.repository_owner }}:${{ github.token }}@github.com/${{ github.repository }}.git" \
         HEAD:$branch \
         --force
-    env:
-      product: ${{ inputs.product }}
-      temppath: ${{ inputs.temppath }}
-      branch: ${{ inputs.branch }}
-      iOS: ${{ inputs.iOS }}
+  env:
+    product: ${{ inputs.product }}
+    temppath: ${{ inputs.temppath }}
+    branch: ${{ inputs.branch }}
+    iOS: ${{ inputs.iOS }}
 
 branding:
   icon: "upload-cloud"
