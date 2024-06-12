@@ -35,6 +35,7 @@ runs:
     - name: Create folder for generated documentation
       shell: bash
       run: |
+        echo "${{ inputs.temppath }}, ${{ github.event.inputs.temppath }}, $temppath"
         mkdir ${{ github.event.inputs.temppath }}
 
     - name: Add docc plugin to Package.swift
