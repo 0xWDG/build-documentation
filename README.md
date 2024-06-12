@@ -3,15 +3,6 @@
 The Swift Package Documentation Generator GitHub Action generates documentation for a Swift package using docc.
 
 ```yaml
-on:
-  # Run on push to main branch
-  push:
-    branches:
-      - main
-
-  # Dispatch if triggered using Github (website)
-  workflow_dispatch:
-
 jobs:
   Build-documentation:
     runs-on: macos-latest
@@ -29,6 +20,8 @@ jobs:
 
 
 ```yaml
+name: build-documentation
+
 on:
   # Run on push to main branch
   push:
