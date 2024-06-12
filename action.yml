@@ -35,7 +35,8 @@ runs:
     - name: Create folder for generated documentation
       shell: bash
       run: |
-        mkdir ${{ inputs.temppath }}
+        echo "inputs.temppath=${{ inputs.temppath }}, temppath=$temppath"
+        mkdir $temppath
 
     - name: Add docc plugin to Package.swift
       shell: bash
@@ -48,11 +49,11 @@ runs:
       shell: bash
       if: ${{ inputs.iOS == false }}
       run: |
-        swift package --allow-writing-to-directory ${{ inputs.temppath }} \
+        swift package --allow-writing-to-directory $temppath \
         generate-documentation \
-        --target ${{ inputs.product }} \
+        --target $product \
         --disable-indexing \
-        --output-path ${{ inputs.temppath }} \
+        --output-path $temppath \
         --transform-for-static-hosting \
         --hosting-base-path `basename ${{ github.repository }}`
 
@@ -60,15 +61,15 @@ runs:
       shell: bash
       if: ${{ inputs.iOS == true }}
       run: |
-        xcodebuild docbuild -scheme ${{ inputs.product }} \
+        xcodebuild docbuild -scheme $product \
         -destination generic/platform=iOS \
         OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path $temppath"
 
     - name: Init new repo in and add required files
       shell: bash
       run: |
-        cd ${{ inputs.temppath }}
-        git init -b ${{ inputs.branch }}
+        cd $temppath
+        git init -b $branch
         DOCURL=`basename ${{ github.repository }}`
         echo "{\"meta\":{\"title\":\"$DOCURL Documentation\"}}" > theme-settings.json
 
@@ -89,8 +90,13 @@ runs:
       run: |
         git push \
         "https://${{ github.repository_owner }}:${{ github.token }}@github.com/${{ github.repository }}.git" \
-        HEAD:${{ inputs.branch }} \
+        HEAD:$branch \
         --force
+    env:
+      product: ${{ inputs.product }}
+      temppath: ${{ inputs.temppath }}
+      branch: ${{ inputs.branch }}
+      iOS: ${{ inputs.iOS }}
 
 branding:
   icon: "upload-cloud"
