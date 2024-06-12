@@ -2,7 +2,7 @@ name: 'Build documentation'
 description: 'Build documentation using Swifts docc'
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       branch:
         description: 'Branch to push to'
