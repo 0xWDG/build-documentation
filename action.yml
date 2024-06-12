@@ -88,9 +88,8 @@ runs:
       run: |
         cd ${{ inputs.temppath }}
         git init -b ${{ inputs.branch }}
-        DOCURL=`basename ${{ github.repository }}`
-        echo "{\"meta\":{\"title\":\"$DOCURL Documentation\"}}" > theme-settings.json
-        DOCURL=${DOCURL//-/_}
+        echo "{\"meta\":{\"title\":\"$PRODUCT_NAME Documentation\"}}" > theme-settings.json
+        DOCURL=${PRODUCT_NAME//-/_}
         echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > index.html
         echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > 404.html
         git add -A .
