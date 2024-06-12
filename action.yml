@@ -8,18 +8,22 @@ on:
         description: 'Branch to push to'
         required: false
         default: 'documentation'
+        type: string
       product:
         description: 'product name'
         required: false
         default: '__AUTO__'
+        type: string
       iOS:
         description: 'Build for iOS?'
         required: true
         default: false
+        type: boolean
       temppath:
         description: 'product name'
         required: false
         default: 'tmpdocs'
+        type: string
 
 jobs:
   build-docc:
@@ -37,11 +41,11 @@ jobs:
         run: |
           mkdir $temppath
 
-      - name: Add docc plugin
+      - name: Add docc plugin to Package.swift
         run: |
           echo "package.dependencies.append(" >> package.swift
           echo "  .package(url: \"https://github.com/apple/swift-docc-plugin\", from: \"1.0.0\")" >> package.swift
-          echo ")" >> package.swift
+          echo ")" >> Package.swift
 
       - name: Build Documentation (SPM)
         if: $iOS == false
