@@ -98,6 +98,7 @@ runs:
         fi
         echo "{\"meta\":{\"title\":\"$PRODUCT_NAME Documentation\"}}" > theme-settings.json
         DOCURL=${PRODUCT_NAME//-/_}
+        DOCURL=${PRODUCT_NAME// /_}
         echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > index.html
         echo "<script>window.location.href = 'documentation/$DOCURL/'.toLowerCase();</script>" > 404.html
         git add -A .
