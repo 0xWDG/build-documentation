@@ -101,6 +101,7 @@ runs:
         DOCURL=${DOCURL// /_}
         echo "<script>window.location.href = (document.location.host.indexOf('github.io') != -1 ? '/`basename ${{ github.repository }}`' : '') + '/documentation/$DOCURL/'.toLowerCase();</script>" > index.html
         cp index.html 404.html
+        touch .nojekyll
         git add -A .
         git config user.name github-actions
         git config user.email github-actions@github.com
