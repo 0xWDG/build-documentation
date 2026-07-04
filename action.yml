@@ -14,7 +14,11 @@ inputs:
     required: false
     default: 'documentation'
   product:
-    description: 'product name'
+    description: 'Product name for Swift packages, or scheme name for Xcode projects'
+    required: false
+    default: '__AUTO__'
+  project:
+    description: 'Path to an .xcodeproj file. Use __AUTO__ to detect one automatically.'
     required: false
     default: '__AUTO__'
   iOS:
@@ -35,67 +39,96 @@ runs:
     - name: Create folder for generated documentation
       shell: bash
       run: |
-        mkdir ${{ inputs.temppath }}
+        mkdir -p "${{ inputs.temppath }}"
 
     - name: Add docc plugin to Package.swift
       shell: bash
       run: |
-        echo "package.dependencies.append(" >> package.swift
-        echo "  .package(url: \"https://github.com/apple/swift-docc-plugin\", from: \"1.0.0\")" >> package.swift
-        echo ")" >> Package.swift
-       
-    - name: Build Documentation (SPM)
+        if [[ -f Package.swift ]]
+        then
+          if ! grep -q "swift-docc-plugin" Package.swift
+          then
+            echo "package.dependencies.append(" >> Package.swift
+            echo "  .package(url: \"https://github.com/apple/swift-docc-plugin\", from: \"1.0.0\")" >> Package.swift
+            echo ")" >> Package.swift
+          fi
+        else
+          echo "No Package.swift found; skipping Swift-DocC plugin setup."
+        fi
+
+    - name: Build Documentation
       shell: bash
-      if: ${{ inputs.iOS == false || inputs.iOS == 'false' }}
       run: |
+        PROJECT_PATH=""
+
+        if [[ "${{ inputs.project }}" != "__AUTO__" ]]
+        then
+          PROJECT_PATH="${{ inputs.project }}"
+        else
+          PROJECT_PATH="$(find . -maxdepth 2 -name "*.xcodeproj" -print -quit)"
+        fi
+
+        if [[ -n "$PROJECT_PATH" && ! -d "$PROJECT_PATH" ]]
+        then
+          echo "::error::Xcode project not found at $PROJECT_PATH"
+          exit 1
+        fi
+
         if [[ "${{ inputs.product }}" == "__AUTO__" ]]
         then
-          # Automatically get package name
-          PRODUCT_NAME=`cat Package.swift | grep -m1 "name" | awk -F'"' '{print $2}'`
+          if [[ -n "$PROJECT_PATH" ]]
+          then
+            PROJECT_LIST_JSON="$(mktemp)"
+            xcodebuild -list -json -project "$PROJECT_PATH" > "$PROJECT_LIST_JSON"
+            PRODUCT_NAME="$(python3 -c 'import json, sys; data = json.load(open(sys.argv[1], encoding="utf-8")); schemes = data.get("project", {}).get("schemes", []); sys.exit("No shared schemes found in the Xcode project.") if not schemes else print(schemes[0])' "$PROJECT_LIST_JSON")"
+          elif [[ -f Package.swift ]]
+          then
+            # Automatically get package name
+            PRODUCT_NAME=`cat Package.swift | grep -m1 "name" | awk -F'"' '{print $2}'`
+          else
+            echo "::error::No Package.swift or .xcodeproj found."
+            exit 1
+          fi
         else
-          # Use provided product name
           PRODUCT_NAME="${{ inputs.product }}"
         fi
+        echo "DOCC_PRODUCT_NAME=$PRODUCT_NAME" >> "$GITHUB_ENV"
         echo "$PRODUCT_NAME"
-        
-        swift package --allow-writing-to-directory ${{ inputs.temppath }} \
-        generate-documentation \
-        --target "$PRODUCT_NAME" \
-        --disable-indexing \
-        --output-path ${{ inputs.temppath }} \
-        --transform-for-static-hosting \
-        --hosting-base-path `basename ${{ github.repository }}`
 
-    - name: Build Documentation (iOS)
-      shell: bash
-      if: ${{ inputs.iOS == true || inputs.iOS == 'true' }}
-      run: |
-        if [[ "${{ inputs.product }}" == "__AUTO__" ]]
+        if [[ -n "$PROJECT_PATH" ]]
         then
-          # Automatically get package name
-          PRODUCT_NAME=`cat Package.swift | grep -m1 "name" | awk -F'"' '{print $2}'`
-        else
-          # Use provided product name
-          PRODUCT_NAME="${{ inputs.product }}"
-        fi
+          if [[ "${{ inputs.iOS }}" == "true" ]]
+          then
+            DESTINATION="generic/platform=iOS"
+          else
+            DESTINATION="generic/platform=macOS"
+          fi
 
-        xcodebuild docbuild -scheme "$PRODUCT_NAME" \
-        -destination generic/platform=iOS \
-        OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path ${{ inputs.temppath }}"
+          xcodebuild docbuild -project "$PROJECT_PATH" \
+          -scheme "$PRODUCT_NAME" \
+          -destination "$DESTINATION" \
+          OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path ${{ inputs.temppath }}"
+        elif [[ "${{ inputs.iOS }}" == "true" ]]
+        then
+          xcodebuild docbuild -scheme "$PRODUCT_NAME" \
+          -destination generic/platform=iOS \
+          OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path ${{ inputs.temppath }}"
+        else
+          swift package --allow-writing-to-directory ${{ inputs.temppath }} \
+          generate-documentation \
+          --target "$PRODUCT_NAME" \
+          --disable-indexing \
+          --output-path ${{ inputs.temppath }} \
+          --transform-for-static-hosting \
+          --hosting-base-path `basename ${{ github.repository }}`
+        fi
 
     - name: Init new repo in and add required files
       shell: bash
       run: |
         cd ${{ inputs.temppath }}
-        git init -b ${{ inputs.branch }}
-        if [[ "${{ inputs.product }}" == "__AUTO__" ]]
-        then
-          # Automatically get package name
-          PRODUCT_NAME=`cat ../Package.swift | grep -m1 "name" | awk -F'"' '{print $2}'`
-        else
-          # Use provided product name
-          PRODUCT_NAME="${{ inputs.product }}"
-        fi
+        git init -b "${{ inputs.branch }}"
+        PRODUCT_NAME="$DOCC_PRODUCT_NAME"
         echo "{\"meta\":{\"title\":\"$PRODUCT_NAME Documentation\"}}" > theme-settings.json
         DOCURL=${PRODUCT_NAME//-/_}
         DOCURL=${DOCURL// /_}

@@ -1,6 +1,6 @@
-# Swift Package Documentation Generator
+# Swift Documentation Generator
 
-The Swift Package Documentation Generator GitHub Action generates documentation for a Swift package using docc.
+The Swift Documentation Generator GitHub Action generates documentation for Swift packages and Xcode projects using docc.
 
 ```yaml
 jobs:
@@ -13,10 +13,11 @@ jobs:
 
 |Parameter|Description|Default value|
 |---|---|---|
-|product|Product name|\_\_AUTO\_\_|
+|product|Product name for Swift packages, or scheme name for Xcode projects|\_\_AUTO\_\_|
+|project|Path to an `.xcodeproj` file. Automatically detects one when available.|\_\_AUTO\_\_|
 |temppath|Temporary Directory to write to|tmpdocs|
 |branch|Branch to write to|documentation|
-|ios|Should we build for iOS?|false|
+|iOS|Should we build for iOS?|false|
 
 
 ```yaml
@@ -40,6 +41,7 @@ jobs:
         uses: 0xWDG/build-documentation@main
         with:
           product: Product-Name
+          project: Product-Name.xcodeproj # Optional, detected automatically when available
           temppath: tmpdocs
           branch: documentation
           iOS: false # Build for iOS
