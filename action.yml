@@ -107,11 +107,17 @@ runs:
           xcodebuild docbuild -project "$PROJECT_PATH" \
           -scheme "$PRODUCT_NAME" \
           -destination "$DESTINATION" \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGN_IDENTITY="" \
           OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path ${{ inputs.temppath }}"
         elif [[ "${{ inputs.iOS }}" == "true" ]]
         then
           xcodebuild docbuild -scheme "$PRODUCT_NAME" \
           -destination generic/platform=iOS \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGN_IDENTITY="" \
           OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path `basename ${{ github.repository }}` --output-path ${{ inputs.temppath }}"
         else
           swift package --allow-writing-to-directory ${{ inputs.temppath }} \
